@@ -1,0 +1,163 @@
+---
+title: "Class9"
+author: "Stephen Curry"
+date: "10/29/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+#input
+```{r}
+wisc.df <- read.csv("WisconsinCancer.csv")
+head(wisc.df)
+```
+
+We have `r nrow(wisc.df)` samples in this dataset
+
+```{r}
+nrow(wisc.df)
+```
+
+#how many benign vs maligment
+```{r}
+table(wisc.df$diagnosis)
+```
+
+
+#convert features of data
+```{r}
+wisc.data <- as.matrix(wisc.df[,3:32])
+row.names(wisc.data) <- wisc.df$id
+head(wisc.data)
+```
+
+#I want to die
+```{r}
+diagnosis <- wisc.df$diagnosis
+```
+
+#Questions
+
+Q1: 
+```{r}
+nrow(wisc.df)
+```
+
+Q2:
+```{r}
+table(wisc.df)
+```
+
+Q3
+```{r}
+colnames(wisc.df)
+```
+
+I can use `length()' to count how many matches the hoe has
+```{r}
+length(grep("_mean", colnames(wisc.df)))
+```
+
+```{r}
+round(colMeans(wisc.data), 3)
+```
+
+```{r}
+round(apply(wisc.data, 2, sd),3)
+```
+
+Them values look hella diff so im finna use `scale=TRUE` when I run that PCA
+
+```{r}
+#Do that PCA on wisc.data by yeeting the code
+wisc.pr <- prcomp(wisc.data, scale=TRUE)
+summary(wisc.pr)
+```
+
+```{r}
+plot(wisc.pr)
+```
+
+Finna make a plot of PC1 vs. PC1=2
+
+```{r}
+plot(wisc.pr$x[,1], wisc.pr$x[,2])
+```
+
+Color by cancer/mei you cancer
+
+```{r}
+plot(wisc.pr$x[,1], wisc.pr$x[,2],, col=diagnosis)
+```
+
+Q4 #importance thing helps do stuff
+```{r}
+x <- summary(wisc.pr)
+x$importance[,1]
+```
+
+Q5
+```{r}
+x$importance[3,] >0.7
+```
+
+```{r}
+## ggplot based graph
+library(factoextra)
+fviz_eig(wisc.pr, addlabels = TRUE)
+```
+
+Q9:
+```{r}
+
+```
+
+Q10:
+```{r}
+y <- summary(wisc.pr)
+which(y$importance["Cumulative Proportion",] > 0.8)[1]
+```
+
+
+```{r}
+wisc.pr.hclust <- hclust(dist(wisc.pr$x[,1:3]))
+```
+```{r}
+wisc.pr.hclust
+```
+```{r}
+groups <- cutree(wisc.pr.hclust, k=2)
+table(groups)
+```
+
+```{r}
+grps <- cutree(wisc.pr.hlcust, k=2)
+table(grps)
+```
+
+```{r}
+table(groups, diagnosis)
+```
+
+```{r}
+url <- "https://tinyurl.com/new-samples-CSV"
+new <- read.csv(url)
+npc <- predict(wisc.pr, newdata=new)
+npc
+```
+
+```{r}
+plot(wisc.pr$x[,1:2], col=diagnosis)
+points(npc[,1], npc[,2], col="blue", pch=16, cex=3)
+text(npc[,1], npc[,2], c(1,2), col="white")
+```
+
+RED=cancer
+Cancer=messed up cells cos science
+
+
