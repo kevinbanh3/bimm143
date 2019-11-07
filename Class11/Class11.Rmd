@@ -1,0 +1,68 @@
+---
+title: "Class 11: Structural Bioinformatics"
+author: "Stephen Curry"
+date: "11/5/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The PDB database for biomolecular structure data
+Q1: Download a CSV file from the PDB site (accessible from “Analyze” -> “PDB Statistics” >
+“by Experimental Method and Molecular Type”. Move this CSV file into your RStudio project
+and determine the percentage of structures solved by X-Ray and Electron Microscopy. Also can
+you determine what proportion of structures are protein? 
+
+Download CSV
+```{r}
+data <- read.csv("Data Export Summary.csv")
+data
+```
+
+```{r}
+(data$Total)
+```
+
+
+```{r}
+sum(data$Total)
+```
+
+```{r}
+sum(data$Proteins)
+```
+
+```{r}
+round(sum(data$Proteins)/sum(data$Total) * 100,2)
+```
+
+```{r}
+(data$Total/sum(data$Total)) * 100
+```
+
+Q2:3039
+
+```{r}
+library(bio3d)
+```
+
+```{r}
+pdb <- read.pdb("1hsg.pdb")
+pdb
+```
+
+```{r}
+a.inds <- atom.select(pdb, chain = "A")
+a.inds
+```
+
+
+```{r}
+ligand <- atom.select(pdb, "protein", value = TRUE)
+write.pdb(ligand, file = "1hsg_ligand.pdb")
+```
+
+
+

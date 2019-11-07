@@ -1,0 +1,43 @@
+---
+title: "Stephen Curry"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#prep for docking
+
+We want make protein only PDB file y drug only PDB file
+
+```{r}
+library(bio3d)
+file.name <- get.pdb("1hsg")
+```
+
+```{r}
+hiv <- read.pdb(file.name)
+hiv
+```
+
+Q1: HOH y MK1; larger resid vlaue=stabilize it 
+
+```{r}
+protein <- atom.select(hiv, "protein", value=TRUE)
+write.pdb(protein, file="1hsg_protein.pdb")
+```
+
+
+```{r}
+ligand <- atom.select(hiv, "ligand", value=TRUE)
+write.pdb(ligand, file="1hsg_ligand.pdb")
+```
+
+
+
+
+
+
+
+
