@@ -1,0 +1,234 @@
+---
+title: "Class14"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r eval=FALSE}
+#eval=FALSE will cause chunk not to run?
+install.packages("BiocManager")
+BiocManager::install()
+BiocManager::install("DESeq2")
+```
+
+
+```{r}
+counts <- read.csv("airway_scaledcounts.csv", stringsAsFactors = FALSE)
+metadata <-  read.csv("airway_metadata.csv", stringsAsFactors = FALSE)
+```
+
+
+```{r}
+head(counts)
+head(metadata)
+```
+
+How many genes in dataset?
+```{r}
+nrow(counts)
+```
+
+How many expts be?
+```{r}
+ncol(counts)
+```
+
+We want know if there be difference in expression values for control (non-drug) vs treated (i.e. drg added cell lines)
+
+1st finna find which expts are control expts y get avg values across all control expts. Then do same for drug treated. 
+```{r}
+View(metadata)
+```
+
+```{r}
+control$id
+```
+
+Calculate mean values across control columns of **countdata** This new robust code allows to do more than 4 groups
+```{r}
+control.mean2 <- rowSums(counts[,control$id])/length(control$id)
+names(control.mean2) <- counts$ensgene
+
+treated.mean2 <- rowSums(counts[,treated$id])/length(treated$id)
+names(treated.mean2) <- counts$ensgene
+```
+
+
+
+
+
+```{r}
+control <- metadata[metadata[,"dex"]=="control",]
+control.mean <- rowSums( counts[ ,control$id] )/4 
+names(control.mean) <- counts$ensgene
+
+treated <- metadata[metadata[,"dex"]=="treated",]
+treated.mean <- rowSums( counts[ ,treated$id] )/4 
+names(treated.mean) <- counts$ensgene
+```
+
+
+
+```{r}
+mean.counts2 <- data.frame(control.mean2, treated.mean2)
+colSums(mean.counts2)
+```
+
+
+```{r}
+#control.mean
+mean.counts <- data.frame(control.mean, treated.mean)
+colSums(mean.counts)
+```
+
+```{r}
+plot(mean.counts2$control.mean2, mean.counts2$treated.mean2, log="xy")
+```
+
+
+```{r}
+mean.counts2$log2fc <- 
+  log2(mean.counts2[, "treated.mean2"]/mean.counts2[,"control.mean2"])
+  head(mean.counts2)
+```
+
+```{r}
+x <- c(56, 0, 26, 0)
+x == 0
+```
+
+```{r}
+which(x==0)
+```
+
+```{r}
+x2 <- data.frame(control=c(56, 0), treated=c(26, 0))
+x2
+```
+
+
+
+
+
+
+```{r}
+x2==0
+```
+
+#arr.ind show exact location of where 0 is in matrix (row 2 col 1 )
+```{r}
+which(x2==0, arr.ind=TRUE)
+```
+
+```{r}
+unique(which(x==0, arr.ind = ))
+```
+
+```{r}
+zero.vals <- which(mean.counts2[,1:2]==0, arr.ind=TRUE)
+
+to.rm <- unique(zero.vals[,1])
+mycounts <- mean.counts2[-to.rm,]
+head(mycounts)
+head(zero.vals)
+```
+
+
+```{r}
+up.ind <- mycounts$log2fc > 2
+down.ind <- mycounts$log2fc < (-2)
+up.ind
+```
+
+```{r}
+sum(up.ind)
+```
+
+
+
+```{r}
+head(mycounts[up.ind,])
+```
+
+
+```{r}
+library(DESeq2)
+citation("DESeq2")
+```
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, 
+                              tidy=TRUE)
+dds
+
+dds <- DESeq(dds)
+res <- results(dds)
+res
+```
+
+
+```{r}
+summary(res)
+```
+
+Volcano plot: combine Fold Change y p-value into one figure indication proportion of genes with large scale significant differences in expression
+```{r}
+#add color por favor
+mycols <- rep("gray", nrow(res))
+#make points +/-2 fold change blue
+mycols[ abs(res$log2FoldChange) > 2 ] <- "blue"
+
+#make points below p-value cutoff red
+mycols[ (res$padj > 0.05)] <- "gray"
+
+plot( res$log2FoldChange, -log(res$padj), col=mycols)
+abline(v=c(-2,2), col="pink")
+abline(h=-log(0.1), col="pink", lty=2)
+```
+
+Save our results
+```{r}
+write.csv(res, file="expression_results.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
