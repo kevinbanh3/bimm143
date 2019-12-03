@@ -1,0 +1,128 @@
+---
+title: "Class18"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+BiocManager::install( c("GenomicDataCommons", "TCGAbiolinks", "maftools") )
+```
+
+```{r}
+library(GenomicDataCommons)
+library(TCGAbiolinks)
+library(maftools)
+```
+
+```{r}
+status()
+```
+
+```{r}
+projects <- getGDCprojects()
+head(projects)
+```
+
+```{r}
+cases_by_project <- cases() %>%
+  facet("project.project_id") %>%
+  aggregations()
+head(cases_by_project)
+```
+#rep() = replicate
+```{r}
+x <- cases_by_project$project.project_id
+
+# Make a custom color vector for our plot
+colvec <- rep("lightblue", nrow(x))
+colvec[(x$key == "TCGA-PAAD")] <- "red"
+
+# Plot with 'log' for y axis and rotate labels with 'las'
+#par(___); 
+# 1st arguemnt= y-values; names.arg=x-values using x$____ 
+barplot(x$doc_count, names.arg= x$key, log="y", col=colvec, las=2)
+```
+
+```{r}
+(x$key == "TCGA-PAAD")
+```
+
+```{r}
+library(bio3d)
+seqs <- read.fasta("lecture18_sequences.fa")
+seqs
+```
+
+9-mer = +/- 8 AA from tumor site
+
+```{r}
+aln <- seqaln(seqs) 
+```
+
+```{r}
+ide <- conserv(seqs$ali, method="identity")
+mutant.sites <- which(ide < 1) 
+pos <- which(ide < 1)[1]
+pos
+subseq.pos <- (pos-8):(pos+8)
+
+seqs$ali[2, subseq.pos]
+```
+
+```{r}
+library(bio3d)
+```
+
+```{r}
+install.packages("gplots")
+```
+
+```{r}
+library(gplots)
+```
+
+```{r}
+z <- read.fasta("project.fasta.txt")
+z
+```
+
+```{r}
+data <- seqidentity(z)
+```
+
+```{r}
+heat <- heatmap(data, margins = c(13,13))
+```
+
+
+```{r}
+x <- "project.fasta.txt"
+```
+
+```{r}
+conseq <- consensus(z)
+```
+
+```{r}
+blast.pdb(conseq$seq)
+```
+```{r}
+library(bio3d)
+```
+
+```{r}
+ids <- c("4HGD", "4H5U", "4HG3")
+```
+
+```{r}
+anno <- pdb.annotate(ids)
+anno
+```
+
+```{r}
+╦read.pdb("4hgd.pdb")
+```
+
